@@ -4,7 +4,7 @@ import cats.effect.IOApp
 import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.kernel.Ref
-import com.jmarin.fsm.model.AssetState
+import com.jmarin.fsm.model.State
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.LoggerFactory
@@ -16,6 +16,7 @@ import cats.effect.std.Random
 import cats.effect.kernel.Async
 import cats.implicits.*
 import cats.effect.kernel.Deferred
+import com.jmarin.fsm.Asset
 
 object Main extends IOApp.Simple:
 
@@ -24,11 +25,11 @@ object Main extends IOApp.Simple:
   override def run: IO[Unit] =
     (for
       _ <- Logger[IO].info(s"Starting Asset Finite State Machine")
-      ref <- Ref.of[IO, AssetState](AssetState.Creating)
+      ref <- Ref.of[IO, State](State.Creating)
       r <- Random.scalaUtilRandom[IO]
       fsm =
         given Random[IO] = r
-        AssetFSM(UUID.randomUUID(), ref)
+        Asset(UUID.randomUUID(), ref)
       currentState <- fsm.getState
       _ <- Logger[IO].info(s"Asset FSM initial state: ${currentState}")
       uploadDeferred <- Deferred[IO, Int]
@@ -37,7 +38,7 @@ object Main extends IOApp.Simple:
       _ <- fsm.downloadOriginalFile()
     yield ())
 
-  private def logState[F[_]: Async: Logger](fsm: AssetFSM[F]): F[Unit] =
+  private def logState[F[_]: Async: Logger](fsm: Asset[F]): F[Unit] =
     for
       currentState <- fsm.getState
       _ <- Logger[F].info(s"Asset FSM current state: $currentState")

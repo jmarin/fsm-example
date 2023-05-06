@@ -4,8 +4,8 @@ import cats.effect.kernel.Ref
 import org.typelevel.log4cats.Logger
 import cats.effect.kernel.Sync
 import cats.effect.kernel.Concurrent
-import com.jmarin.fsm.model.AssetState
-import com.jmarin.fsm.model.AssetState.*
+import com.jmarin.fsm.model.State
+import com.jmarin.fsm.model.State.*
 import com.jmarin.fsm.api.AssetApi
 import cats.implicits.*
 import java.util.UUID
@@ -15,14 +15,14 @@ import concurrent.duration.DurationInt
 import cats.effect.kernel.Deferred
 import cats.effect.implicits.*
 
-final case class AssetFSM[F[_]: Async: Logger: Random](
+final case class Asset[F[_]: Async: Logger: Random](
     id: UUID,
-    state: Ref[F, AssetState]
+    state: Ref[F, State]
 ) extends AssetApi[F]:
 
   given F[Random[F]] = Random.scalaUtilRandom
 
-  def getState: F[AssetState] = state.get
+  def getState: F[State] = state.get
 
   def uploadOriginalFile(): F[Unit] =
     state.modify {
@@ -42,7 +42,7 @@ final case class AssetFSM[F[_]: Async: Logger: Random](
 
       case _ =>
         Logger[F].error(s"Cannot download file when in state: $state")
-        (AssetState.ReadyForDownload, Async[F].unit) // WRONG!!!
+        (State.ReadyForDownload, Async[F].unit) // WRONG!!!
 
     }
 

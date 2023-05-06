@@ -2,11 +2,11 @@ package com.jmarin.fsm.model
 
 import cats.effect.kernel.Deferred
 
-enum AssetState:
-  case Creating extends AssetState
-  case Uploading extends AssetState
-  case Approving extends AssetState
-  case ReadyForProcessing extends AssetState
-  case Processing extends AssetState
-  case ReadyForDownload extends AssetState
-  case Unavailable extends AssetState
+enum State:
+  case Creating extends State
+  case Uploading extends State
+  case Approving extends State
+  case ReadyForProcessing extends State
+  case Processing extends State
+  case ReadyForDownload extends State
+  case Unavailable extends State
