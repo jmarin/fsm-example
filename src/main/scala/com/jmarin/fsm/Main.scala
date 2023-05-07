@@ -35,9 +35,8 @@ object Main extends IOApp.Simple:
         Asset(UUID.randomUUID(), ref, queue)
       initialState <- fsm.getState
       _ <- Logger[IO].info(s"Asset FSM initial state: ${initialState}")
-      // _ <- fsm.uploadOriginalFile() *> logState(fsm)
       _ <- (fsm.uploadOriginalFile(), fsm.processOriginal()).parTupled
-    // _ <- fsm.downloadOriginalFile()
+      _ <- fsm.downloadOriginalFile()
     yield ())
 
   private def logState[F[_]: Async: Logger](fsm: Asset[F]): F[Unit] =

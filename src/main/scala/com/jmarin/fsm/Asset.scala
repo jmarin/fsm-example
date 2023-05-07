@@ -69,6 +69,7 @@ final case class Asset[F[_]: Async: Logger: Random](
       fib2 <- deferredExecution(deferred).start
       _ <- fib1.join
       _ <- fib2.join
+      _ <- Logger[F].info("File Downloaded")
     yield ()
 
   def processOriginal(): F[Unit] =
