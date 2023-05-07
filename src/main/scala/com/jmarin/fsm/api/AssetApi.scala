@@ -7,3 +7,4 @@ trait AssetApi[F[_]]:
   def getState: F[State]
   def uploadOriginalFile(): F[Unit]
   def downloadOriginalFile(): F[Unit]
+  def processOriginal(): F[Unit]
