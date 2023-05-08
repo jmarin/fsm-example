@@ -121,4 +121,4 @@ final case class Asset[F[_]: Async: Logger: Random](
     yield r
 
   private def randomDelay: F[Int] =
-    Random[F].betweenInt(1, 10)
+    Random[F].betweenInt(1, 15)
