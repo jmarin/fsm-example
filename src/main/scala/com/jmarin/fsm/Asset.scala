@@ -76,17 +76,31 @@ final case class Asset[F[_]: Async: Logger: Random](
     for
       ready <- queue.take
       _ <- Logger[F].info(s"Notification: $ready")
-      deferred <- Deferred[F, Int]
-      fib1 <- deferredOperation("Process File", deferred).start
-      fib2 <- deferredExecution(deferred).start
-      _ <- fib1.join
-      _ <- fib2.join
+      _ <- (checkDuplicates(), extractMetadata()).parTupled
       _ <- state.modify {
         case ReadyForProcessing => (ReadyForDownload, Async[F].unit)
         case _                  => (ReadyForProcessing, Async[F].unit)
       }
       s <- getState
       _ <- Logger[F].info(s"Asset FSM Current state: $s")
+    yield ()
+
+  private def checkDuplicates(): F[Unit] =
+    for
+      deferred <- Deferred[F, Int]
+      fib1 <- deferredOperation("Duplicate Finder", deferred).start
+      fib2 <- deferredExecution(deferred).start
+      _ <- fib1.join
+      _ <- fib2.join
+    yield ()
+
+  private def extractMetadata(): F[Unit] =
+    for
+      deferred <- Deferred[F, Int]
+      fib1 <- deferredOperation("Metadata Extraction", deferred).start
+      fib2 <- deferredExecution(deferred).start
+      _ <- fib1.join
+      _ <- fib2.join
     yield ()
 
   private def deferredOperation(
@@ -107,4 +121,4 @@ final case class Asset[F[_]: Async: Logger: Random](
     yield r
 
   private def randomDelay: F[Int] =
-    Random[F].betweenInt(1, 5)
+    Random[F].betweenInt(1, 10)
